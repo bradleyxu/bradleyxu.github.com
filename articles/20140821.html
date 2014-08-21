@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Bradleyxu.github.com by bradleyxu</title>
+    <link rel="stylesheet" href="../stylesheets/styles.css">
+    <link rel="stylesheet" href="../stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="../javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="../stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+<div id="header">
+    <nav>
+    </nav>
+</div>
+<div class="wrapper">
+    <section>
+        <div id="title">
+            <h1 style="font-family:'Microsoft YaHei'">Bradley_Xu 笔尖上的码农</h1>
+            <hr style="margin-top:50px">
+            <div style="font-size:20px;font-family:'Microsoft YaHei';text-align:center;margin-bottom:8px">C++实践反思（一）：尽量不要将数据成员的写操作放在类外</div>
+            <p style="font-size:14px;text-align:left">摘要：对数据成员执行写操作是大多数类都会涉及的一个需求，将这种操作移至外部尽管表面上显得很灵活，但却会遗留<!--
+                -->一些潜在的问题，下面就让我们用一个简单的案例来对此进行阐述</p>
+            <hr style="margin-bottom:30px">
+            <p style="font-size:14px;text-align:left">考虑这样一个场景，我们的程序中拥有一个class A与struct B（结构忽略）：</p>
+            <pre style="height:150px">
+                <code style="position:absolute;top:310px;left:-20px">
+                    class A
+                    {
+                    public:
+                        vector&#60;B&#62;& GetVec() {return m_Vec;}
+                    private:
+                        vector&#60;B&#62; m_Vec;
+                    };
+                </code>
+            </pre>
+            <p style="font-size:14px;text-align:left;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
+            -->现在B中需要加入一个新的字段，因而我们可能需要修改所有对m_Vec进行添加或修改的相关代码，以便对新的字段进行赋值。于是苦逼的<!--
+            -->码农开始了对所有对GetVec进行引用的相关代码的查找，大致有20至30处（在大型项目中可能远不止这个数），并且大多数都将其值赋<!--
+            -->给了一个新的引用变量。好，让我们继续找这些引用变量有没有执行会添加或更新m_Vec的相关操作，先找到第一个引用变量，不错，好<!--
+            -->像没发现明显的添加或修改操作。哎！它竟然被当作引用传给了另一个函数，进入该函数看看，嗯，不错，好像没发现明显的添加或更新<!--
+            -->操作。哎！它竟然被当作引用传给了另一个函数……。为了避免文章中充斥着无用的相同语句，我们就在此打住。可以想象，如果苦逼的码农<!--
+            -->需要进行20至30次这样的查找过程，那我们的一下午基本快过去一半了（如果将m_Vec访问类型改为public或者还拥有其他的将m_Vec<!--
+            -->传出的接口，或许就真的需要先出去旅游散心了）。那么，是什么在给我们本就轻(ku)松(da)愉(chou)快(shen)的编码生活锦上添花<!--
+            -->呢，显然是GetVec惹的祸，让我们对这个类进行重构：</p>
+            <pre style="height:172px">
+                <code style="position:absolute;top:820px;left:-20px">
+                    class A
+                    {
+                    public:
+                        void Push (const B &b);
+                        ……//（以下省略其他所需的更新操作）
+                    private:
+                        vector&#60;B&#62; m_Vec;
+                    };
+                </code>
+            </pre>
+            <p style="font-size:14px;text-align:left;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
+            -->现在，我们的工作就是找到所有调用Push（及其他更新接口）的代码即可，由于其添加或更新位置与调用位置一致，因此便不需再大费<!--
+            -->周章地完成上述的查找过程了。当然，此时还需先对Push等m_Vec更新接口进行查找，但由于这个过程是在本类中完成的（同时还有定义<!--
+            -->良好的函数名作为参考，而外部调用的上下文则很可能是一堆不明含义的业务逻辑），因此，整个过程将比原始场景省力太多（同时，我<!--
+            -->们还能用const保证来区分仅对m_Vec进行读取及会对m_Vec进行修改的接口）。对于读操作来说，由于将其封装为接口的难度要远大于<!--
+            -->写操作（我们无法为了支持新功能而盲目地扩展接口），故很可能需要不时将其传递到外部，但能够在类中完成的工作也应尽力用成员函<!--
+            -->数来实现。</p>
+            <p style="font-size:14px;text-align:left;LINE-HEIGHT:0px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
+            -->最后，牵强地首尾呼应一下，尽量不要将数据成员的写操作放在类外！</p>
+        </div>
+    </section>
+</div>
+<!--[if !IE]>
+<script>fixScale(document);</script>
+<![endif]-->
+</body>
+</html>
