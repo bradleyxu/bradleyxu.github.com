@@ -26,9 +26,10 @@
         <div id="title">
             <h1 style="font-family:'Microsoft YaHei'">Bradley_Xu 笔尖上的码农</h1>
             <hr style="margin-top:50px">
-            <div style="font-size:20px;font-family:'Microsoft YaHei';text-align:center;margin-bottom:8px">C++实践反思（一）：尽量不要将数据成员的写操作放在类外</div>
-            <p style="font-size:14px;text-align:left">摘要：对数据成员执行写操作是大多数类都会涉及的一个需求，将这种操作移至外部尽管表面上显得很灵活，但却会遗留<!--
-                -->一些潜在的问题，下面就让我们用一个简单的案例来对此进行阐述</p>
+            <div style="font-size:20px;font-family:'Microsoft YaHei';text-align:center;margin-bottom:8px">
+                C++实践反思（一）：尽量不要将数据成员传递到类外</div>
+            <p style="font-size:14px;text-align:left">摘要：作为面向对象的最佳实践之一，这个条款对我们来说并不陌生，尽管最佳实践并不具有普适性，但在某些场景下违<!--
+                -->背它却会带来巨大的灾难，下面就让我们用一个简单的案例来对此进行阐述</p>
             <hr style="margin-bottom:30px">
             <p style="font-size:14px;text-align:left">考虑这样一个场景，我们的程序中拥有一个class A与struct B（结构忽略）：</p>
             <pre style="height:150px">
@@ -66,10 +67,9 @@
             <p style="font-size:14px;text-align:left;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
             -->现在，我们的工作就是找到所有调用Push（及其他更新接口）的代码即可，由于其添加或更新位置与调用位置一致，因此便不需再大费<!--
             -->周章地完成上述的查找过程了。当然，此时还需先对Push等m_Vec更新接口进行查找，但由于这个过程是在本类中完成的（同时还有定义<!--
-            -->良好的函数名作为参考，而外部调用的上下文则很可能是一堆不明含义的业务逻辑），因此，整个过程将比原始场景省力太多（同时，我<!--
-            -->们还能用const保证来区分仅对m_Vec进行读取及会对m_Vec进行修改的接口）。对于读操作来说，由于将其封装为接口的难度要远大于<!--
-            -->写操作（我们无法为了支持新功能而盲目地扩展接口），故很可能需要不时将其传递到外部，但能够在类中完成的工作也应尽力用成员函<!--
-            -->数来实现。</p>
+            -->良好的函数名作为参考，而外部调用的上下文则很可能是一堆不明含义的业务逻辑），因此，整个过程将比原始场景省力太多（同时，我
+            -->们还能用const保证来区分仅对m_Vec进行读取及会对m_Vec进行修改的接口）。尽管本文是以写操作为例的，但对于读操作来说实际上<!--
+            -->也同样类似的，能够在类中完成的工作应尽力用成员函数来实现。</p>
             <p style="font-size:14px;text-align:left;LINE-HEIGHT:0px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
             -->最后，牵强地首尾呼应一下，尽量不要将数据成员的写操作放在类外！</p>
         </div>

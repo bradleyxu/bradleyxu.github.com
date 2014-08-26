@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Bradleyxu.github.com by bradleyxu</title>
+    <link rel="stylesheet" href="../stylesheets/styles.css">
+    <link rel="stylesheet" href="../stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="../javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="../stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+</head>
+<body>
+<div id="header">
+    <nav>
+    </nav>
+</div>
+<div class="wrapper">
+    <section>
+        <div id="title">
+            <h1 style="font-family:'Microsoft YaHei'">Bradley_Xu 笔尖上的码农</h1>
+            <hr style="margin-top:50px">
+            <div style="font-size:20px;font-family:'Microsoft YaHei';text-align:center;margin-bottom:8px">
+                PHP应用探讨（一）：变量名动态获取</div>
+            <p style="font-size:14px;text-align:left">摘要：变量名作为一个代号，一般不太受到程序员们的关注（除为了践行良好的编码<!--
+                -->规范外），但某些特殊的场景却需要在运行时获取它，而PHP的灵活性也为这类需求提供了可能，本文将从笔者最近所遇到的一个实<!--
+                -->际需求出发对获取的方法进行总结</p>
+            <hr style="margin-bottom:30px">
+            <p style="font-size:14px;text-align:left;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
+                -->与这个问题的邂逅来源于笔者对一个调试日志系统的完善，其中，该过程需要在接口函数对输入参数进行前置过滤及校验前将参数<!--
+                -->输出到日志中，而此时便需要准备好包含参数名/值的键值对数据。虽然，在每个接口函数手动将参数名称字符串硬编码进代码中也<!--
+                -->不失为一种方案，但其费力的特点实在让懒惰的笔者不忍直视，好吧，就算我们卷起袖口心中默念：大不了今晚不看爸爸去哪儿了！<!--
+                -->但仍然有一堆问题扑面而来，其中，最重要的便是这个方案难以支持变更（参数产生任何变化都需要更改相应的参数名称字符串代<!--
+                -->码），这显然是为日后无法观看爸爸去哪儿埋下了巨大的隐患！</p>
+            <p style="font-size:14px;text-align:left;margin-top:-15px;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;
+                &#160;&#160;&#160;<!--
+                -->要解决这个问题，首先需要了解一个函数get_defined_vars()，该函数返回一个包含所有已定义变量列表的多维数组，这些变<!--
+                -->量包括环境变量、服务器变量和用户定义的变量，更具体的说，其可返回当前作用域下所有变量（包括参数）的数组，该数组以变<!--
+                -->量名与变量值作为键值对。因此，我们可以基于变量值来获取变量名，但由于变量值与变量名是一个一对多的映射，故想要获得变<!--
+                -->量名需要绕一些弯路，下面是一个典型的算法：</p>
+            <pre style="height:120px">
+                <code style="position:absolute;top:660px;left:-20px">
+                    1）将一个随机值赋给所需获取变量名的变量；
+                    2）若数组中仅存在一个与值该随机值相同的键值对，则其键即为所需获取的变量名；
+                    &#160;&#160;&#160;&#160;&#160;若数组中在多个与值该随机值相同的键值对，则返回1（应保证每次的随机值都不重复，可采用
+                    &#160;&#160;&#160;&#160;&#160;拟随机序列）；
+                </code>
+            </pre>
+            <p style="font-size:14px;text-align:left;LINE-HEIGHT:30px">&#160;&#160;&#160;&#160;&#160;&#160;&#160;<!--
+                -->这个算法虽然笨拙，但理论上能够保证一定可提取出所需的变量名（欢迎大家提出更有效的算法）。此外，另一个需要注意的地方<!--
+                -->即是get_defined_vars()的返回值类型，由于这个方法的核心在于依靠独立变量与数组中相应变量的同步变化，故对于只能返回<!--
+                -->非引用类型的get_defined_vars()来说，在每次更新变量值后都需要对其进行调用（也是鉴于此，我们无法封装一个单独的完成<!--
+                -->这个工作的函数并将该函数的返回作为参数传递它），当然，这个过程并非不能简化，感谢Donovan利用PHP的可变变量特性提供了<!--
+                -->一种解决方案，其代码如下：</p>
+            <pre style="height:157px">
+                <code style="position:absolute;top:1015px;left:-20px">
+                    $defined_vars = array();
+                    $var_names = array_keys(get_defined_vars());
+                    foreach ($var_names as $var_name)
+                    {
+                        $defined_vars[$var_name] =& $$var_name;
+                    }
+
+                </code>
+            </pre>
+        </div>
+    </section>
+</div>
+<!--[if !IE]>
+<script>fixScale(document);</script>
+<![endif]-->
+</body>
+</html>
